@@ -10,16 +10,21 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.AlMundo.CallCenterDomains.*;
 import com.AlMundo.CallCenterSimulator.Dispatcher;
 
 public class AppManager {
 
+	private static final Logger log = LoggerFactory.getLogger(Dispatcher.class);
+	
 	private ArrayList<Call> incomingCalls;
 	private ArrayList<Employee> operators;
 	private ArrayList<Employee> supervisors;
 	private ArrayList<Employee> directors;
-	private static final int numLlamadasAlTiempo = 10;
+	private int numEmployees;
 	
 	public static void main(String[] args) {
 		new AppManager().calling();
@@ -27,22 +32,56 @@ public class AppManager {
 	}
 
 	public void calling() {
+		int numOperators = 5;
+		int numSupervisors = 2;
+		int numDirectors = 1;
 		
-        Integer numberCalls = 15;
+		this.numEmployees = numOperators + numSupervisors + numDirectors;
+		
+        int numberCalls = 15;
         
         this.incomingCalls = this.createCalls(numberCalls);
-
+        this.createEmployees(numOperators, numSupervisors, numDirectors);
+        
         long init = System.currentTimeMillis();
         
-        ExecutorService executorService = Executors.newFixedThreadPool(this.numLlamadasAlTiempo);
+        ExecutorService executorService = Executors.newFixedThreadPool(this.numEmployees);
+        
+//        for (Call call: incomingCalls) {
+//            Runnable dispatcher = new Dispatcher(call, init);
+//            executorService.execute(dispatcher);
+//        }
         
         for (Call call: incomingCalls) {
-            Runnable dispatcher = new Dispatcher(call, init);
-            executorService.execute(dispatcher);
+        	int position;
+        	Runnable dispatcher = null;
+        	if(!operators.isEmpty()) {
+        		position = operators.size()-1;
+        		Employee employee = operators.get(position);
+        		dispatcher = new Dispatcher(call, init, employee);
+        		operators.remove(position);
+        		executorService.execute(dispatcher);
+        	}else if(!supervisors.isEmpty()) {
+        		position = supervisors.size()-1;
+        		Employee employee = supervisors.get(position);
+        		supervisors.remove(position);
+        		dispatcher = new Dispatcher(call, init, employee);
+        		executorService.execute(dispatcher);
+        	}else if(!directors.isEmpty()) {
+        		position = directors.size()-1;
+        		Employee employee = directors.get(position);
+        		directors.remove(position);
+        		dispatcher = new Dispatcher(call, init, employee);
+        		executorService.execute(dispatcher);
+        		directors.add(employee);
+        	}else {
+        		call.setStatus("En Espera");
+            	log.info("La llamada "+call.getCallId()+" esta "+ call.getStatus());
+        	}
         }
         executorService.shutdown();	// Cierro el Executor
         while (!executorService.isTerminated()) {
-        	//System.out.println("<--->");
+        	System.out.print(". ");
         	// Espero a que terminen de ejecutarse todos los procesos 
         	// para pasar a las siguientes instrucciones 
         }

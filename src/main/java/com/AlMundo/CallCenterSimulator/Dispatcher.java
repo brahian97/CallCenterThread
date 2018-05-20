@@ -16,20 +16,22 @@ public class Dispatcher implements Runnable {
 	private static final Logger log = LoggerFactory.getLogger(Dispatcher.class);
 
 	private Call incomingCall;
+	private Employee employee;
 	private long initialTime;
 
-	public Dispatcher(Call call, long initialTime) {
+	public Dispatcher(Call call, long initialTime, Employee employee) {
 		this.incomingCall = call;
 		this.initialTime = initialTime;
+		this.employee = employee;
 	}
 
 	public void run() {
-		log.info("El operador " + Thread.currentThread().getName() + " contesto la llamada "
+		log.info("El " + employee.getCharge() + " " + employee.getId() + " contesto la llamada "
 				+ this.incomingCall.getCallId() + " EN EL TIEMPO: "
 				+ (System.currentTimeMillis() - this.initialTime) / 1000 + "seg");
 		this.esperarXsegundos(this.incomingCall.getDuration());
 
-		log.info("El operador " + Thread.currentThread().getName() + " HA TERMINADO LA LLAMADA "
+		log.info("El " + employee.getCharge() + " " + employee.getId() + " HA TERMINADO LA LLAMADA "
 				+ this.incomingCall.getCallId() + " EN EL TIEMPO: "
 				+ (System.currentTimeMillis() - this.initialTime) / 1000 + "seg");
 
@@ -63,4 +65,12 @@ public class Dispatcher implements Runnable {
 		return log;
 	}
 
+	public Employee getEmployee() {
+		return employee;
+	}
+
+	public void setEmployee(Employee employee) {
+		this.employee = employee;
+	}
+	
 }

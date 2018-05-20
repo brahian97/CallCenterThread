@@ -45,43 +45,50 @@ public class AppManager {
         
         long init = System.currentTimeMillis();
         
-        ExecutorService executorService = Executors.newFixedThreadPool(this.numEmployees);
+        ExecutorService executorService = Executors.newFixedThreadPool(this.numEmployees+2);
         
 //        for (Call call: incomingCalls) {
 //            Runnable dispatcher = new Dispatcher(call, init);
 //            executorService.execute(dispatcher);
 //        }
         
+//        for (Call call: incomingCalls) {
+//        	int position;
+//        	Runnable dispatcher = null;
+//        	if(!operators.isEmpty()) {
+//        		position = operators.size()-1;
+//        		Employee employee = operators.get(position);
+//        		dispatcher = new Dispatcher(call, init, employee);
+//        		operators.remove(position);
+//        		executorService.execute(dispatcher);
+//        	}else if(!supervisors.isEmpty()) {
+//        		position = supervisors.size()-1;
+//        		Employee employee = supervisors.get(position);
+//        		supervisors.remove(position);
+//        		dispatcher = new Dispatcher(call, init, employee);
+//        		executorService.execute(dispatcher);
+//        	}else if(!directors.isEmpty()) {
+//        		position = directors.size()-1;
+//        		Employee employee = directors.get(position);
+//        		directors.remove(position);
+//        		dispatcher = new Dispatcher(call, init, employee);
+//        		executorService.execute(dispatcher);
+//        		directors.add(employee);
+//        	}else {
+//        		call.setStatus("En Espera");
+//            	log.info("La llamada "+call.getCallId()+" esta "+ call.getStatus());
+//        	}
+//        }
+        
         for (Call call: incomingCalls) {
-        	int position;
-        	Runnable dispatcher = null;
-        	if(!operators.isEmpty()) {
-        		position = operators.size()-1;
-        		Employee employee = operators.get(position);
-        		dispatcher = new Dispatcher(call, init, employee);
-        		operators.remove(position);
-        		executorService.execute(dispatcher);
-        	}else if(!supervisors.isEmpty()) {
-        		position = supervisors.size()-1;
-        		Employee employee = supervisors.get(position);
-        		supervisors.remove(position);
-        		dispatcher = new Dispatcher(call, init, employee);
-        		executorService.execute(dispatcher);
-        	}else if(!directors.isEmpty()) {
-        		position = directors.size()-1;
-        		Employee employee = directors.get(position);
-        		directors.remove(position);
-        		dispatcher = new Dispatcher(call, init, employee);
-        		executorService.execute(dispatcher);
-        		directors.add(employee);
-        	}else {
-        		call.setStatus("En Espera");
-            	log.info("La llamada "+call.getCallId()+" esta "+ call.getStatus());
-        	}
+        	Runnable dispatcher = new Dispatcher(call, init, operators, supervisors, directors);
+        	log.info("La llamada " + call.getCallId() + " esta en el espera, EN EL TIEMPO: "
+    				+ (System.currentTimeMillis() - init )/ 1000 + "seg");
+        	executorService.execute(dispatcher);
         }
         executorService.shutdown();	// Cierro el Executor
         while (!executorService.isTerminated()) {
-        	System.out.print(". ");
+        	//System.out.print(". ");
         	// Espero a que terminen de ejecutarse todos los procesos 
         	// para pasar a las siguientes instrucciones 
         }

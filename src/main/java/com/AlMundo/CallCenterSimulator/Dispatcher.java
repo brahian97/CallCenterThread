@@ -59,6 +59,9 @@ public class Dispatcher implements Runnable {
     	}else {
     		log.info("La llamada " + this.incomingCall.getCallId() + " esta en el espera, EN EL TIEMPO: "
     				+ (System.currentTimeMillis() - this.initialTime) / 1000 + "seg");
+    		this.esperarXsegundos(1);
+    		run();
+    		
     	}
 	}
 
@@ -74,11 +77,13 @@ public class Dispatcher implements Runnable {
 		int position = employees.size()-1;
 		Employee employee = employees.get(position);
 		employees.remove(position);
+		this.incomingCall.setAgent(employee);
+		this.incomingCall.setStatus("En atención");
 		log.info("El " + employee.getCharge() + " " + employee.getId() + " contesto la llamada "
 				+ this.incomingCall.getCallId() + " EN EL TIEMPO: "
 				+ (System.currentTimeMillis() - this.initialTime) / 1000 + "seg");
 		this.esperarXsegundos(this.incomingCall.getDuration());
-
+		this.incomingCall.setStatus("Finalizada");
 		log.info("El " + employee.getCharge() + " " + employee.getId() + " HA TERMINADO LA LLAMADA "
 				+ this.incomingCall.getCallId() + " EN EL TIEMPO: "
 				+ (System.currentTimeMillis() - this.initialTime) / 1000 + "seg");

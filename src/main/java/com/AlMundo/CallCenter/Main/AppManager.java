@@ -82,8 +82,6 @@ public class AppManager {
         
         for (Call call: incomingCalls) {
         	Runnable dispatcher = new Dispatcher(call, init, operators, supervisors, directors);
-        	log.info("La llamada " + call.getCallId() + " esta en el espera, EN EL TIEMPO: "
-    				+ (System.currentTimeMillis() - init )/ 1000 + "seg");
         	executorService.execute(dispatcher);
         }
         executorService.shutdown();	// Cierro el Executor
